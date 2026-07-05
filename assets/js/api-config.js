@@ -1,21 +1,17 @@
 // Central place to configure where the Flask backend lives.
 //
-// - When you open the site locally (double-click index.html, or run it on
-//   127.0.0.1 / localhost with a simple static server) it will call your
-//   local Flask server at http://localhost:5000.
-// - When you deploy the frontend and backend together on the SAME domain
-//   (e.g. Render, Railway, PythonAnywhere serving both the static files
-//   and the Flask app) it automatically uses the current origin, so you
-//   don't have to edit this file for production.
-//
-// If you deploy the frontend and backend on DIFFERENT domains (e.g.
-// frontend on GitHub Pages/Netlify and backend on PythonAnywhere/Render),
-// replace the line below with your backend's public URL, for example:
-//   const API_BASE_URL = 'https://yourusername.pythonanywhere.com';
+// Your setup: frontend on GitHub Pages, backend on PythonAnywhere.
+// These are two DIFFERENT domains, so window.location.origin (the GitHub
+// Pages URL) is NOT the backend - it must be hardcoded below. Without this,
+// the contact form silently tries to POST to the GitHub Pages domain itself,
+// which has no server and returns 405 Method Not Allowed.
+const PRODUCTION_API_BASE_URL = 'https://kevinpk.pythonanywhere.com';
+
 const API_BASE_URL = (function () {
     const isLocal = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
     if (isLocal) {
         return 'http://localhost:5000';
     }
-    return window.location.origin;
+    return PRODUCTION_API_BASE_URL;
 })();
+
