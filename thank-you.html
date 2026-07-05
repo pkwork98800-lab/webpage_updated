@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Thank You | Fara Technologies</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <style>
+        body { background: #000; color: #fff; display: flex; align-items: center; justify-content: center; height: 100vh; text-align: center; font-family: sans-serif; }
+        .container { max-width: 600px; }
+        .title { font-size: 3rem; font-weight: bold; margin-bottom: 1rem; color: #0096FF; }
+        .text { font-size: 1.2rem; margin-bottom: 2rem; color: #ccc; }
+        .btn { padding: 1rem 2rem; background: #0096FF; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Thank You!</h1>
+        <p class="text">Your request has been received. Our technical team will review your requirements and reach out to you within 24 hours.</p>
+        <a href="index.html" class="btn">Return Home</a>
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', (event) => {
+            fetch('http://localhost:5000/api/visit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ page: window.location.pathname })
+            }).catch(err => console.log('Visit tracking offline'));
+        });
+    </script>
+
+</body>
+</html>

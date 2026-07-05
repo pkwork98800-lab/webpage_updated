@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Submissions | FARATECH</title>
+    <style>
+        body { background: #0a0a0a; color: #fff; font-family: sans-serif; margin: 0; }
+        nav { background: #1a1a1a; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; }
+        nav a { color: #fff; text-decoration: none; margin-left: 1.5rem; font-size: 0.9rem; }
+        nav .logo { font-weight: bold; color: #0096FF; font-size: 1.2rem; }
+        .container { padding: 2rem; max-width: 1200px; margin: auto; }
+        .filter-bar { background: #1a1a1a; padding: 1rem; border-radius: 10px; margin-bottom: 2rem; display: flex; align-items: center; gap: 1rem; border: 1px solid #333; }
+        .filter-bar input { padding: 0.5rem; background: #000; border: 1px solid #444; color: #fff; border-radius: 5px; }
+        .filter-bar button { padding: 0.5rem 1rem; background: #0096FF; border: none; color: #fff; border-radius: 5px; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; background: #1a1a1a; border-radius: 10px; overflow: hidden; border: 1px solid #333; }
+        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #333; font-size: 0.9rem; }
+        th { background: #252525; color: #aaa; }
+        .attachment-link { color: #0096FF; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">FARATECH ADMIN</div>
+        <div>
+            <a href="/admin/dashboard">Dashboard</a>
+            <a href="/admin/submissions">Submissions</a>
+            <a href="/admin/logout" style="color: #ff4d4d;">Logout</a>
+        </div>
+    </nav>
+    <div class="container">
+        <h1>Form Submissions</h1>
+        <div class="filter-bar">
+            <form action="/admin/submissions" method="GET" style="display: flex; gap: 1rem; align-items: center;">
+                <label>Filter by Date:</label>
+                <input type="date" name="date">
+                <button type="submit">Filter</button>
+                <a href="/admin/submissions" style="color: #aaa; font-size: 0.8rem; text-decoration: none;">Clear</a>
+            </form>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Message</th>
+                    <th>Attachment</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in submissions %}
+                <tr>
+                    <td>{{ s.timestamp }}</td>
+                    <td>{{ s.name }}</td>
+                    <td>{{ s.phone }}</td>
+                    <td>{{ s.message }}</td>
+                    <td>
+                        {% if s.attachment_path %}
+                        <a href="/uploads/{{ s.attachment_path }}" target="_blank" class="attachment-link">View File</a>
+                        {% else %}
+                        None
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
