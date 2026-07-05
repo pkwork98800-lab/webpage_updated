@@ -21,9 +21,11 @@
         <a href="index.html" class="btn">Return Home</a>
     </div>
 
+    <script src="assets/js/api-config.js"></script>
+
     <script>
         window.addEventListener('DOMContentLoaded', (event) => {
-            fetch('http://localhost:5000/api/visit', {
+            fetch(API_BASE_URL + '/api/visit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ page: window.location.pathname })

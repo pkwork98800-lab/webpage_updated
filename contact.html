@@ -187,8 +187,7 @@
                             </div>
                         </div>
                         <div class="col-lg-6">
-                            <form class="form-contact m-0 effectFade fadeUp" action="/thank-you" method="POST" data-netlify="true" name="project-consultation">
-                                <input type="hidden" name="form-name" value="project-consultation" />
+                            <form class="form-contact m-0 effectFade fadeUp" id="contactForm">
                                 <h4 class="heading fw-semibold">Fill this form below</h4>
                                 <fieldset class="mb-21">
                                     <label class="fw-semibold text-body-3 mb-20">Your Name</label>
@@ -206,7 +205,7 @@
                                     <i class="icon icon-paperclip-solid fs-24"></i>
                                     <div class="fw-semibold text-body-3">Add an Attachment</div>
                                 </div>
-                                <button type="submit" class="tf-btn w-100">Submit Message</button>
+                                <button type="submit" class="tf-btn w-100" id="contactSubmitBtn">Submit Message</button>
                             </form>
                         </div>
                     </div>
@@ -515,13 +514,47 @@
     <script src="assets/js/main.js" defer></script>
 
 
+    <!-- Backend API base URL: same-origin in production, localhost:5000 when opened locally -->
+    <script src="assets/js/api-config.js"></script>
+
     <script>
         window.addEventListener('DOMContentLoaded', (event) => {
-            fetch('http://localhost:5000/api/visit', {
+            fetch(API_BASE_URL + '/api/visit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ page: window.location.pathname })
             }).catch(err => console.log('Visit tracking offline'));
+
+            const contactForm = document.getElementById('contactForm');
+            if (contactForm) {
+                contactForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const btn = document.getElementById('contactSubmitBtn');
+                    const originalText = btn.textContent;
+                    btn.textContent = 'Sending...';
+                    btn.disabled = true;
+
+                    const formData = new FormData(contactForm);
+
+                    fetch(API_BASE_URL + '/api/contact', {
+                        method: 'POST',
+                        body: formData
+                    })
+                        .then(res => {
+                            if (!res.ok) throw new Error('Server error: ' + res.status);
+                            return res.json();
+                        })
+                        .then(data => {
+                            window.location.href = 'thank-you.html';
+                        })
+                        .catch(err => {
+                            console.error('Contact form submission failed:', err);
+                            alert('Sorry, something went wrong sending your message. Please try again in a moment.');
+                            btn.textContent = originalText;
+                            btn.disabled = false;
+                        });
+                });
+            }
         });
     </script>
 

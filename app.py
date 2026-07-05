@@ -7,13 +7,22 @@ from datetime import datetime
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-app.secret_key = 'SUPER_SECRET_ENCRYPTED_KEY_123456789' # In production, use env var
+app.secret_key = os.environ.get('SECRET_KEY', 'SUPER_SECRET_ENCRYPTED_KEY_123456789') # In production, use env var
+app.config['SESSION_TYPE'] = 'filesystem'  # Fix: SESSION_TYPE was never set, which crashed Flask-Session on startup
 bcrypt = Bcrypt(app)
 Session(app)
 
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 # 16MB limit
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)  # Fix: folder never existed, would crash on file upload
+
+# Allow the frontend (opened as a file or hosted elsewhere) to call this API
+try:
+    from flask_cors import CORS
+    CORS(app)
+except ImportError:
+    pass
 
 # INITIAL CONFIG - This is for the first setup
 DEFAULT_ADMIN_ID = 'admin'
@@ -30,9 +39,16 @@ def ensure_admin():
         conn.commit()
     conn.close()
 
-@app.before_first_request
+_startup_done = False
+
+@app.before_request
 def startup():
-    ensure_admin()
+    # Fix: before_first_request was removed in Flask 2.3+, so this never ran
+    # and the default admin account was never created in the database.
+    global _startup_done
+    if not _startup_done:
+        ensure_admin()
+        _startup_done = True
 
 # --- PUBLIC API ---
 
