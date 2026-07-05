@@ -9,10 +9,19 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'SUPER_SECRET_ENCRYPTED_KEY_123456789') # In production, use env var
 app.config['SESSION_TYPE'] = 'filesystem'  # Fix: SESSION_TYPE was never set, which crashed Flask-Session on startup
+# Fix: Flask-Session's filesystem backend defaults to a *relative* folder
+# ('./flask_session'), which fails under WSGI hosts (PermissionError) since
+# the working directory isn't guaranteed to be this project folder. Point
+# it at an absolute path next to this file instead.
+app.config['SESSION_FILE_DIR'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'flask_session')
 bcrypt = Bcrypt(app)
 Session(app)
 
-UPLOAD_FOLDER = 'uploads'
+# Fix: use an absolute path for uploads too, for the same reason as the
+# database path below - under WSGI the working directory isn't guaranteed
+# to be this project folder.
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 # 16MB limit
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)  # Fix: folder never existed, would crash on file upload
@@ -38,6 +47,14 @@ def ensure_admin():
                      (DEFAULT_ADMIN_ID, hashed_pw, DEFAULT_PASS_KEY, 1))
         conn.commit()
     conn.close()
+
+# Fix: init_db() used to only run inside `if __name__ == '__main__':`, which
+# never executes when the app is loaded by a WSGI server (PythonAnywhere,
+# Render, Gunicorn, etc.) importing this file as a module. That's why
+# ensure_admin() below was hitting "no such table: admin_config" - the
+# tables were never created in that environment. Call it unconditionally
+# at import time so it always runs, regardless of how the app is started.
+init_db()
 
 _startup_done = False
 

@@ -1,12 +1,19 @@
 import sqlite3
 import os
 
-DB_PATH = 'admin.db'
+# Fix: use an absolute path based on this file's location instead of a
+# relative path. Under WSGI (PythonAnywhere, Render, etc.) the process's
+# working directory is not guaranteed to be the project folder, so a
+# relative 'admin.db' can silently create/read the database in the wrong
+# place, causing "no such table" errors even though init_db() ran before.
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, 'admin.db')
 
 def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
+
 
 def init_db():
     conn = get_db_connection()
